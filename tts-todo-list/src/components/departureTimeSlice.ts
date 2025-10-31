@@ -3,15 +3,16 @@ import type { RootState } from "../store";
 
 export interface DepartureTimeState {
     departureTime : string
+    storedMinutesLeft : number
 }
 
 const DEP_TIME_KEY = "deptime";
 const initialState : DepartureTimeState = {
-    departureTime: localStorage.getItem(DEP_TIME_KEY) ?? "08:00"
+    departureTime: localStorage.getItem(DEP_TIME_KEY) ?? "08:00",
+    storedMinutesLeft: -1
 };
 
 export const isValidTime = (payload : string) => {
-    console.log(payload)
     if (payload.match(/^\d\d:\d\d$/)) {
         const [hrs, mins] = payload.split(":");
         if (parseInt(hrs) < 24 && parseInt(mins) < 60) {
@@ -21,19 +22,28 @@ export const isValidTime = (payload : string) => {
     return false;
 }
 
+export const toTime = (payload : string) => {
+    const [hrs, mins] = payload.split(":");
+
+    return [parseInt(hrs), parseInt(mins)]
+}
+
 export const departureTimeSlice = createSlice({
     name: 'departureTime',
     initialState,
     reducers: {
         setDepartureTime(state, { payload } : { payload : string}) {
             if (isValidTime(payload)) {
-                
                 state.departureTime = payload
+                localStorage.setItem(DEP_TIME_KEY, payload);
             }
+        },
+        setMinutesLeft(state, { payload }) {
+            state.storedMinutesLeft = payload
         }
     }
 });
 
-export const { setDepartureTime  } = departureTimeSlice.actions;
+export const { setDepartureTime, setMinutesLeft  } = departureTimeSlice.actions;
 export const selectDepartureTime = (state : RootState) => state.departureTime;
 export default departureTimeSlice.reducer;
