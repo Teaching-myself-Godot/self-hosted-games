@@ -7,6 +7,28 @@ import { Provider } from 'react-redux';
 import App from './App.tsx'
 import { store } from './store.ts';
 import { setMinutesLeft, toTime } from './components/departureTimeSlice.ts';
+import { WebSpeechReadAloudNavigator } from './readium-speech/index.ts';
+
+const navigator = new WebSpeechReadAloudNavigator()
+let navigatorReady = false;
+async function initVoices() {
+  try {
+    const unfilteredVoices = await navigator.getVoices();
+    const dutchVoices = (unfilteredVoices).filter(v => v.language.startsWith("nl"))
+    const voices = dutchVoices.length === 0 ? unfilteredVoices : dutchVoices;
+    console.log(voices);
+    if (voices.length > 0) {
+      navigator.setVoice(voices[0])
+      navigatorReady = true;
+    } else {
+      console.error("No voices found:");
+    }
+
+  } catch (error) {
+    console.error("Error initializing voices:", error);
+  }
+}
+initVoices()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -30,6 +52,9 @@ function makeMessage(tooLate : boolean, delta : number, name : string, activity 
 }
 
 setInterval(() => {
+  if (!navigatorReady) {
+    return
+  }
   const now = new Date();
   const targetTime = new Date();
   const { departureTime, storedMinutesLeft, personName } = store.getState().departureTime
@@ -47,6 +72,8 @@ setInterval(() => {
   if (todos.filter((t)=> !t.done).length > 0) {
     if ((deltaMinutes === 0 && !tooLate &&  deltaSeconds % 10 === 0) || deltaMinutes !== storedMinutesLeft) {
       console.warn(makeMessage(tooLate, delta, personName, todos.find((t) => !t.done)!.task))
+      navigator.loadContent({text: makeMessage(tooLate, delta, personName, todos.find((t) => !t.done)!.task)});
+      navigator.play()
     }
   }
   store.dispatch(setMinutesLeft(deltaMinutes));
