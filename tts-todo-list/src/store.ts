@@ -3,11 +3,13 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux';
 import credentialsReducer from './components/superSafeCredentialsSlice';
 import departureTimeReducer from "./components/departureTimeSlice";
+import todoItemReducer from "./components/todoListSlice";
 
 export const store = configureStore({
   reducer: {
     credentials: credentialsReducer,
-    departureTime: departureTimeReducer
+    departureTime: departureTimeReducer,
+    todos: todoItemReducer
   }
 });
 

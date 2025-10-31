@@ -1,6 +1,7 @@
 import './App.css'
 import { SuperSafeLogin } from './components/SuperSafeLogin'
 import { DepartureTimeForm } from './components/DepartureTimeForm'
+import { TodoListForm } from './components/TodoListForm'
 
 function App() {
 
@@ -8,6 +9,7 @@ function App() {
     <>
       <SuperSafeLogin />
       <DepartureTimeForm />
+      <TodoListForm />
     </>
   )
 }

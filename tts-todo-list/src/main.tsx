@@ -32,7 +32,8 @@ function makeMessage(tooLate : boolean, delta : number, name : string, activity 
 setInterval(() => {
   const now = new Date();
   const targetTime = new Date();
-  const { departureTime, storedMinutesLeft } = store.getState().departureTime
+  const { departureTime, storedMinutesLeft, personName } = store.getState().departureTime
+  const { todos } = store.getState().todos;
   const [hrs, mins] = toTime(departureTime);
 
   targetTime.setHours(hrs)
@@ -43,8 +44,10 @@ setInterval(() => {
   const delta = tooLate ? now.getTime() - targetTime.getTime() : targetTime.getTime() - now.getTime();
   const deltaMinutes = Math.floor(delta / 60 / 1000);
   const deltaSeconds = Math.floor(delta / 1000);
-  if ((deltaMinutes === 0 && !tooLate &&  deltaSeconds % 10 === 0) || deltaMinutes !== storedMinutesLeft) {
-    console.warn(makeMessage(tooLate, delta, "Chris", "kleed je aan"))
+  if (todos.filter((t)=> !t.done).length > 0) {
+    if ((deltaMinutes === 0 && !tooLate &&  deltaSeconds % 10 === 0) || deltaMinutes !== storedMinutesLeft) {
+      console.warn(makeMessage(tooLate, delta, personName, todos.find((t) => !t.done)!.task))
+    }
   }
   store.dispatch(setMinutesLeft(deltaMinutes));
 

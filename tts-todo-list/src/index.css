@@ -40,8 +40,12 @@ button {
   width: 120px;
 }
 
+input[type=checkbox] + label {
+  cursor: pointer;
+}
 
-input {
+input[type=text],
+input[type=password] {
   width: calc(100% - 124px - 1em - 2.4em);
 }
 

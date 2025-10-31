@@ -4,12 +4,15 @@ import type { RootState } from "../store";
 export interface DepartureTimeState {
     departureTime : string
     storedMinutesLeft : number
+    personName : string
 }
 
 const DEP_TIME_KEY = "deptime";
+const KID_KEY = "naampje";
 const initialState : DepartureTimeState = {
     departureTime: localStorage.getItem(DEP_TIME_KEY) ?? "08:00",
-    storedMinutesLeft: -1
+    storedMinutesLeft: -1,
+    personName : localStorage.getItem(KID_KEY) ?? "Kind"
 };
 
 export const isValidTime = (payload : string) => {
@@ -38,12 +41,16 @@ export const departureTimeSlice = createSlice({
                 localStorage.setItem(DEP_TIME_KEY, payload);
             }
         },
+        setPersonName(state, { payload }) {
+            state.personName = payload
+            localStorage.setItem(KID_KEY, payload);
+        },
         setMinutesLeft(state, { payload }) {
             state.storedMinutesLeft = payload
         }
     }
 });
 
-export const { setDepartureTime, setMinutesLeft  } = departureTimeSlice.actions;
+export const { setDepartureTime, setMinutesLeft, setPersonName  } = departureTimeSlice.actions;
 export const selectDepartureTime = (state : RootState) => state.departureTime;
 export default departureTimeSlice.reducer;
