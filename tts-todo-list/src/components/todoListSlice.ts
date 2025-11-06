@@ -35,12 +35,17 @@ export const todoItemSlice = createSlice({
             state.todos[idx].task = val
             localStorage.setItem(TODO_ITEM_KEY, JSON.stringify(state.todos.map((todo) => ({done: false, task: todo.task})) ))
         },
+        moveTaskUp(state, { payload }) {
+            const swp = state.todos[payload - 1];
+            state.todos[payload - 1] = state.todos[payload];
+            state.todos[payload] = swp;
+        },
         toggleTaskDone(state, { payload }) {
             state.todos[payload].done = !state.todos[payload].done
         }
     }
 });
 
-export const { addTask, removeTask, updateTask, toggleTaskDone } = todoItemSlice.actions;
+export const { addTask, removeTask, updateTask, toggleTaskDone, moveTaskUp } = todoItemSlice.actions;
 export const selectTodoItems = (state : RootState) => state.todos;
 export default todoItemSlice.reducer;

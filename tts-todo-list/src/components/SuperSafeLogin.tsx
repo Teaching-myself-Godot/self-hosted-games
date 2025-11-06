@@ -9,8 +9,11 @@ export function SuperSafeLogin() {
 
     if (!superSecretPassword) {
         return (
-            <form style={{position: "fixed", zIndex: "1000", top: "0", left: "0", height: "100%", width: "100%", backgroundColor: "black"}} onSubmit={(ev) => {ev.preventDefault(); dispatch(setSuperSecretPassword(passwd)); setPasswd("")}}>
-                <input type="password" autoComplete="none" placeholder="Maak een ontgrendelwachtwoord..." onChange={(ev) => setPasswd(ev.target.value)}/>
+            <form style={{position: "fixed", zIndex: "1000", top: "0", left: "0", height: "100%", width: "100%", backgroundColor: "black"}}
+                onSubmit={(ev) => {ev.preventDefault(); dispatch(setSuperSecretPassword(passwd)); setPasswd("")}}>
+                <input type="password" autoComplete="off" placeholder="Maak een ontgrendelwachtwoord..."
+                        value={passwd} name="ontgrendelo"
+                        onChange={(ev) => setPasswd(ev.target.value)}/>
                 <button type="submit" disabled={passwd.length < 3}>
                     OK
                 </button>
@@ -26,7 +29,9 @@ export function SuperSafeLogin() {
     }
     return (
         <form onSubmit={(ev) => {ev.preventDefault(); dispatch(unlock(passwd)); setPasswd("") }}>
-            <input type="password" autoComplete="none" placeholder="Ontgrendelwachtwoord..." onChange={(ev) => setPasswd(ev.target.value)}/>
+            <input type="password" autoComplete="off" placeholder="Ontgrendelwachtwoord..." name="ontgrendelo"
+                value={passwd}
+                onChange={(ev) => setPasswd(ev.target.value)}/>
             <button type="submit" disabled={passwd !== superSecretPassword}>Ontgrendel</button>
         </form>
     );

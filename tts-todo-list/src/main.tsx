@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 
 import App from './App.tsx'
 import { store } from './store.ts';
-import { setMinutesLeft, toTime } from './components/departureTimeSlice.ts';
+import { setSecondsLeft, toTime } from './components/departureTimeSlice.ts';
 import { WebSpeechReadAloudNavigator } from './readium-speech/index.ts';
 
 const navigator = new WebSpeechReadAloudNavigator()
@@ -20,6 +20,7 @@ async function initVoices() {
     if (voices.length > 0) {
       navigator.setVoice(voices[0])
       navigatorReady = true;
+      speakMessage();
     } else {
       console.error("No voices found:");
     }
@@ -38,28 +39,44 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>
 );
 
-function makeMessage(tooLate : boolean, delta : number, name : string, activity : string) {
+function makeMessage(tooLate : boolean, delta : number, name : string, activity : string, endGoal : string) {
     const deltaSeconds = Math.floor(delta / 1000);
     const deltaMinutes = Math.floor(delta / 60 / 1000);
     const deltaHours = Math.floor(delta / 60 / 60 / 1000);
     const realMinutesLeft = deltaMinutes - (deltaHours * 60);
     const realSecondsLeft = deltaSeconds - (deltaMinutes * 60);
     if (deltaMinutes === 0) {
-      return `${name}, ${tooLate ? "je bent nu" : "je hebt nog"} ${realSecondsLeft === 1 ? `${realSecondsLeft} seconde` : `${realSecondsLeft} seconden`}${tooLate ? " te laat" : ""}, ${activity}`;
+      return `${name}, ${tooLate ? "je bent nu" : "je hebt nog"} ${realSecondsLeft === 1 ? `${realSecondsLeft} seconde` : `${realSecondsLeft} seconden`}${tooLate ? " te laat" : " " + endGoal}, ${activity}`;
     } else {
-      return `${name}, ${tooLate ? "je bent nu" : "je hebt nog"} ${deltaHours > 0 ? `${deltaHours} uur en ` : ""}${realMinutesLeft === 1 ? `${realMinutesLeft} minuut` : `${realMinutesLeft} minuten`}${tooLate ? " te laat" : ""}, ${activity}`;
+      return `${name}, ${tooLate ? "je bent nu" : "je hebt nog"} ${deltaHours > 0 ? `${deltaHours} uur, ` : ""}${realMinutesLeft === 1 ? `${realMinutesLeft} minuut en ` : `${realMinutesLeft} minuten en `}${realSecondsLeft === 1 ? `${realSecondsLeft} seconde` : `${realSecondsLeft} seconden`}${tooLate ? " te laat" : " " + endGoal}, ${activity}`;
     }
 }
 
-setInterval(() => {
+
+
+let previousPersonName = "";
+let previousEndgoal = "";
+let previousTodosRemaining = -1;
+let previousDepartureTime = "";
+
+function speakMessage() {
   if (!navigatorReady) {
     return
   }
+
   const now = new Date();
   const targetTime = new Date();
-  const { departureTime, storedMinutesLeft, personName } = store.getState().departureTime
+  const { departureTime, storedSecondsLeft, personName, endGoal } = store.getState().departureTime
   const { todos } = store.getState().todos;
+  const { unlocked } = store.getState().credentials;
+  if (unlocked) { return; }
   const [hrs, mins] = toTime(departureTime);
+  const todosRemaining = todos.filter((t) => !t.done).length;
+  const forced = previousPersonName !== personName || previousEndgoal !== endGoal || previousTodosRemaining !== todosRemaining || previousDepartureTime !== departureTime;
+  previousPersonName = personName;
+  previousEndgoal = endGoal;
+  previousTodosRemaining = todosRemaining;
+  previousDepartureTime = departureTime;
 
   targetTime.setHours(hrs)
   targetTime.setMinutes(mins)
@@ -69,13 +86,15 @@ setInterval(() => {
   const delta = tooLate ? now.getTime() - targetTime.getTime() : targetTime.getTime() - now.getTime();
   const deltaMinutes = Math.floor(delta / 60 / 1000);
   const deltaSeconds = Math.floor(delta / 1000);
-  if (todos.filter((t)=> !t.done).length > 0) {
-    if ((deltaMinutes === 0 && !tooLate &&  deltaSeconds % 10 === 0) || deltaMinutes !== storedMinutesLeft) {
-      console.warn(makeMessage(tooLate, delta, personName, todos.find((t) => !t.done)!.task))
-      navigator.loadContent({text: makeMessage(tooLate, delta, personName, todos.find((t) => !t.done)!.task)});
+  if (todosRemaining > 0) {
+    if (forced || (deltaMinutes === 0 && !tooLate &&  deltaSeconds % 10 === 0) || Math.abs(deltaSeconds - storedSecondsLeft) > 59) {
+      const message = makeMessage(tooLate, delta, personName, todos.find((t) => !t.done)!.task, endGoal);
+      console.debug(message)
+      navigator.loadContent({text: message});
       navigator.play()
+      store.dispatch(setSecondsLeft(deltaSeconds));
     }
   }
-  store.dispatch(setMinutesLeft(deltaMinutes));
+}
 
-}, 1000);
+setInterval(speakMessage, 1000);

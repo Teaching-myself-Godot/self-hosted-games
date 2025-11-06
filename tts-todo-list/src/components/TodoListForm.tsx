@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store";
 import { selectCredentials } from "./superSafeCredentialsSlice";
-import { addTask, selectTodoItems, removeTask, updateTask, toggleTaskDone } from "./todoListSlice";
+import { addTask, selectTodoItems, removeTask, updateTask, toggleTaskDone, moveTaskUp } from "./todoListSlice";
+import dragIcon from "./drag.svg";
 
 export function TodoListForm() {
     const dispatch = useAppDispatch()
@@ -11,7 +12,12 @@ export function TodoListForm() {
     return (<>
         <div>Takenlijst</div>
         {todos.map((todo, idx) => unlocked ? (
-            <div key={idx}>
+            <div key={idx} style={{display: "flex"}}>
+                {idx > 0 && (
+                    <button className="move-up-button" onClick={() => dispatch(moveTaskUp(idx))}>
+                        <img src={dragIcon} />{" "}
+                    </button>
+                )}
                 <input type="text" value={todo.task} onChange={(ev) => dispatch(updateTask({idx: idx, val: ev.target.value}))} />
                 <button onClick={() => dispatch(removeTask(idx))}>Verwijder</button>
             </div>
