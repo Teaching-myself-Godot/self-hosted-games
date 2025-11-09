@@ -117,7 +117,6 @@ const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
 function initializeGodot() {
-    document.getElementById("canvas").requestFullscreen();
 	const statusOverlay = document.getElementById('status');
 	const statusProgress = document.getElementById('status-progress');
 	const statusNotice = document.getElementById('status-notice');
@@ -213,6 +212,8 @@ function initializeGodot() {
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+            document.getElementById("canvas").requestFullscreen();
+
 		}, displayFailureNotice);
 	}
 };
