@@ -102,7 +102,10 @@ body {
 			Your browser does not support JavaScript.
 		</noscript>
 		<div id="status">
-            <span style="z-index: 1000; cursor: pointer; user-select: none;" onclick="initializeGodot()">Start!</span>
+            <span style="z-index: 1000; cursor: pointer; user-select: none; display: block; padding-top: 200px; font-family: sans-serif; font-size: 2em;"
+				onclick="initializeGodot()">
+				Start Tatra!
+			</span>
             <button onclick="initializeGodot()" style="color: white">
 			    <img id="status-splash" class="show-image--true fullsize--false use-filter--true" src="index.png" alt="" />
             </button>
@@ -112,7 +115,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4521148,"index.wasm":38057390},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4521436,"index.wasm":38057390},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 let initializeClicked = false;
@@ -215,7 +218,9 @@ function initializeGodot() {
 		}).then(() => {
 			setStatusMode('hidden');
             document.getElementById("canvas").requestFullscreen();
-
+			if (typeof screen.orientation.lock !== 'undefined') {
+				screen.orientation.lock('landscape').catch((e) => {})
+			}
 		}, displayFailureNotice);
 	}
 };
